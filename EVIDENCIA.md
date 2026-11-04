@@ -65,7 +65,7 @@ Ferramentas listadas: `HealthGet`, `SessionFindAll`, `SessionGetStats`,
 
 ```
 $ python3 scripts/conferir-hashes.py
-arquivos nossos: 61
+arquivos nossos: 63
 hashes do alvo: 2291
 colisoes: 0
 ```

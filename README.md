@@ -42,7 +42,7 @@ sendo o motor simulado, sem rede. O ensaio real está em [EVIDENCIA.md](EVIDENCI
 ## Motor real (opcional)
 
 ```bash
-npm i baileys@7.0.0-rc14      # não entra em dependencies; é opt-in explícito
+npm i --no-save baileys@7.0.0-rc14   # --no-save: package.json continua sem dependências
 FIO_RAIZ_MOTOR=baileys npm start
 ```
 

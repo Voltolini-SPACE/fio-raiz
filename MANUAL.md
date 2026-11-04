@@ -60,7 +60,7 @@ Enviar em sessão que não está `conectada` responde `409`.
 ## 5. Transporte real (opcional)
 
 ```bash
-npm i baileys@7.0.0-rc14
+npm i --no-save baileys@7.0.0-rc14
 FIO_RAIZ_MOTOR=baileys FIO_RAIZ_DATA=./data npm start
 ```
 
