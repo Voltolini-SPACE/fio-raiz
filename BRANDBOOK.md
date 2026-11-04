@@ -13,7 +13,7 @@ servidor, com API, MCP e painel no mesmo pacote.
 ## Voz
 
 - Direta, técnica, sem hype. Frases curtas. Nada de “revolucionário”.
-- Fala em resultado verificável: “64 testes passando”, não “robusto”.
+- Fala em resultado verificável: “68 testes passando”, não “robusto”.
 - Trata limite como informação: “o transporte real de WhatsApp ainda não está
   embutido”, não “em breve”.
 - Português do Brasil; termos de API em inglês (`sessionId`, `webhook`).
@@ -57,3 +57,8 @@ infraestrutura, não de aplicativo de conversa.
 - Copiar texto, ícone ou cor de outro gateway.
 - Prometer paridade total: o que não existe está em PARIDADE.md com data.
 - Usar emoji em documentação ou painel.
+
+## Arquivos da marca
+
+- `docs/marca/fio-raiz.svg` — símbolo (raiz + broto) em vetor, fundo Papel.
+- `favicon.svg` — mesma arte servida em `/favicon.svg` e ligada no painel.

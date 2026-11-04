@@ -2,7 +2,7 @@ import type { Rota } from '../http/roteador.ts';
 
 const PAGINA = `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fio Raiz — painel</title>
+<title>Fio Raiz — painel</title><link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
 :root{--tinta:#10231c;--papel:#f4faf6;--marca:#1f7a5a;--borda:#cfe3d7}
 *{box-sizing:border-box}body{margin:0;font:15px/1.5 ui-sans-serif,system-ui,sans-serif;color:var(--tinta);background:var(--papel)}
@@ -48,7 +48,14 @@ async function carregar() {
 document.getElementById('conectar').addEventListener('click', carregar);
 </script></body></html>`;
 
+const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#F4FAF6"/><path d="M32 56V30" stroke="#1F7A5A" stroke-width="6" stroke-linecap="round"/><path d="M32 32C32 20 24 12 12 12c0 12 8 20 20 20Z" fill="#1F7A5A"/><path d="M32 40c0-10 7-17 18-17 0 10-7 17-18 17Z" fill="#1F7A5A" opacity=".65"/><circle cx="32" cy="56" r="4" fill="#10231C"/></svg>`;
+
 export const rotasPainel: Rota[] = [
+  { metodo: 'GET', padrao: '/favicon.svg', publica: true, tratar: ({ res }) => {
+    res.writeHead(200, { 'content-type': 'image/svg+xml', 'cache-control': 'public, max-age=86400' });
+    res.end(FAVICON);
+    return null;
+  } },
   { metodo: 'GET', padrao: '/painel', publica: true, tratar: ({ res }) => {
     res.writeHead(200, {
       'content-type': 'text/html; charset=utf-8',

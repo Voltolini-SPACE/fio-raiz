@@ -43,6 +43,20 @@ Estados: `implementado` (existe, com teste), `adaptado` (mesma intenção, forma
 | POST | `/api/sessions/{id}/stop` | implementado | testes/sessoes.test.ts |
 | POST | `/api/sessions/{id}/pair` | adaptado | testes/sessoes.test.ts |
 
+## Rotas próprias, fora do contrato do alvo
+
+Não existem no contrato público; são extensão nossa e estão testadas.
+
+| Método | Rota | Por quê | Teste |
+| --- | --- | --- | --- |
+| PUT | `/api/settings` | preferências locais por chave | testes/auth.test.ts |
+| POST | `/api/sessions/{id}/contacts` | cadastro local de contato | testes/sessoes.test.ts |
+| POST | `/api/sessions/{id}/messages/send-media` | envio de mídia por URL | testes/sessoes.test.ts |
+| POST | `/api/webhooks` | criação de webhook | testes/webhooks.test.ts |
+| DELETE | `/api/webhooks/{id}` | remoção de webhook | testes/webhooks.test.ts |
+| POST | `/mcp` | servidor MCP (JSON-RPC) | testes/mcp.test.ts |
+| GET | `/painel` | painel de leitura | testes/painel.test.ts |
+
 ## Rotas excluídas (2026-11-04)
 
 Tudo o que não aparece acima. Motivo comum: plugin/ingress/integração, exportação de dados, métricas Prometheus, auditoria, painel completo, SDK e o pacote de administração de sessões além do ciclo básico. Cada linha abaixo é ausência declarada, não pendência escondida.
@@ -230,12 +244,12 @@ Tudo o que não aparece acima. Motivo comum: plugin/ingress/integração, export
 
 | Capacidade | Estado | Evidência |
 | --- | --- | --- |
-| Sessões (ciclo de vida, QR, pareamento) | implementado (simulado padrão; real opcional) | testes/sessoes.test.ts |
+| Sessões (ciclo de vida, QR, pareamento) | implementado (motor simulado) | testes/sessoes.test.ts |
 | Envio de texto e mídia | implementado | testes/sessoes.test.ts |
 | Webhooks com entrega e histórico | implementado | testes/webhooks.test.ts |
 | MCP (initialize, tools/list, tools/call) | implementado, 10 ferramentas | testes/mcp.test.ts, mcp/recibo-cliente.json |
 | Painel | implementado, leitura | testes/painel.test.ts |
-| Transporte real de WhatsApp (Baileys, opt-in) | implementado; conexão e envio real verificados em 04/11; entrada de terceiros não verificada | `src/motor/baileys.ts`, testes/motor-baileys.test.ts, EVIDENCIA.md |
+| Transporte real de WhatsApp (Baileys, opt-in) | implementado; QR, pareamento, envio e 46 mensagens de entrada verificados em 04/11 | `src/motor/baileys.ts`, EVIDENCIA.md |
 | Plugins, ingress, integrações | excluído | — |
 | Métricas Prometheus, auditoria, exportação | excluído | — |
 | SDK e clientes oficiais | excluído | — |

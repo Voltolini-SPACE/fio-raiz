@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="t">
+  <title id="t">Fio Raiz</title>
+  <rect width="64" height="64" rx="14" fill="#F4FAF6"/>
+  <path d="M32 56V30" stroke="#1F7A5A" stroke-width="6" stroke-linecap="round"/>
+  <path d="M32 32C32 20 24 12 12 12c0 12 8 20 20 20Z" fill="#1F7A5A"/>
+  <path d="M32 40c0-10 7-17 18-17 0 10-7 17-18 17Z" fill="#1F7A5A" opacity=".65"/>
+  <circle cx="32" cy="56" r="4" fill="#10231C"/>
+</svg>

@@ -7,8 +7,8 @@ Comandos e saídas recortadas; nada aqui é simulação de teste unitário.
 
 ```
 $ npm test
-ℹ tests 23
-ℹ pass 23
+ℹ tests 68
+ℹ pass 68
 ℹ fail 0
 ```
 
@@ -55,7 +55,8 @@ Ferramentas listadas: `HealthGet`, `SessionFindAll`, `SessionGetStats`,
 
 ## Não coberto por esta evidência
 
-- Pareamento real de WhatsApp em celular (não há adaptador real; ver PARIDADE.md).
+- Pareamento real de WhatsApp em celular: coberto abaixo em
+  “Conexão real com aparelho” (adaptador Baileys opt-in).
 - Entrega de webhook contra serviço externo: coberta por teste com receptor HTTP
   local em `testes/webhooks.test.ts`, não contra a internet.
 - Carga, concorrência e recuperação após queda do processo.
@@ -64,10 +65,14 @@ Ferramentas listadas: `HealthGet`, `SessionFindAll`, `SessionGetStats`,
 
 ```
 $ python3 scripts/conferir-hashes.py
-arquivos nossos: 40
+arquivos nossos: 61
 hashes do alvo: 2291
 colisoes: 0
 ```
+
+Em clone limpo o manifesto do alvo não existe: o script sai com código 1 e
+mensagem `comparação NÃO VERIFICADA (manifesto ausente)` — repita dentro da
+Fábrica, onde `referencias/openwa-sha256.txt` está presente.
 
 Nenhum arquivo do produto coincide com qualquer arquivo do alvo: prova técnica de não cópia,
 complementar ao registro de contato prévio em RASTREABILIDADE.md.
@@ -83,7 +88,7 @@ POST /api/sessions                    {"motor":"baileys","estado":"criada"}
 POST /api/sessions/<id>/start         estado=aguardando_qr  (779 ms)
 GET  /api/sessions/<id>/qr            estado=aguardando_qr  qr_len=277
                                       prefixo https://wa.me/settings/linked_devices#2@
-npm test                              42 testes, 42 verdes, 0 falhas
+npm test                              42 testes, 42 verdes, 0 falhas   # histórico deste commit
 npx tsc --noEmit                      sem erros
 ```
 
@@ -109,15 +114,15 @@ POST /messages/send-text         {"estado":"enviada"} · msg_b7ac9c3a-…
 GET  /messages                   mensagem de saída gravada no histórico
 ```
 
-O envio chegou ao WhatsApp do próprio número (conversa "você"). **NÃO VERIFICADO:**
-recebimento de mensagem de outro aparelho e recibo de entrega/leitura — o produto
-não rastreia ack. A sessão ficou ativa em `data/sessoes/` para o teste de entrada.
+O envio chegou ao WhatsApp do próprio número (conversa "você"). O recebimento de
+mensagens de terceiros está na seção “Entrada real” abaixo (46 mensagens).
+**NÃO VERIFICADO:** recibo de entrega/leitura — o produto não rastreia ack.
 
 ## CI (2026-11-04)
 
 `.github/workflows/ci.yml` a cada push em `main`: `npm ci`, `npm run check`
 (`tsc --noEmit`) e `npm test`. Primeira execução: **run 41847084256**, commit
-`a4bc3a7`, conclusão verde; 45 testes no total. Sem `baileys` instalado a suíte
+`a4bc3a7`, conclusão verde; 45 testes naquele commit (hoje 68). Sem `baileys` instalado a suíte
 passa e `/start` responde `503 motor_indisponivel` com o comando de instalação.
 
 ## Entrada real (2026-11-04, 14:23–14:47 UTC)

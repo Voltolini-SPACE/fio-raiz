@@ -17,7 +17,7 @@ sem dependências de produção, em Node 24 + TypeScript e SQLite embutido.
 ```bash
 git clone https://github.com/Voltolini-SPACE/fio-raiz && cd fio-raiz
 npm ci            # só ferramentas de desenvolvimento (typescript)
-npm test          # 64 testes, node --test
+npm test          # 68 testes, node --test
 npm start         # http://127.0.0.1:2790
 ```
 
@@ -96,6 +96,6 @@ Licença MIT — [LICENSE](LICENSE) · [NOTICE](NOTICE).
 
 ## Qualidade
 
-`npm test` (64 testes) e `npm run check` (`tsc --noEmit`) rodam no CI a cada
+`npm test` (68 testes) e `npm run check` (`tsc --noEmit`) rodam no CI a cada
 push; o badge acima mostra o estado. Sem `baileys` instalado a suíte passa e o
 `/start` responde `503 motor_indisponivel` com o comando de instalação.

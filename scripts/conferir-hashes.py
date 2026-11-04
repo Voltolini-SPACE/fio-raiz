@@ -28,7 +28,8 @@ def hashes_do_repo() -> dict[str, list[str]]:
 
 def ler_manifesto(caminho: Path) -> set[str]:
     if not caminho.is_file():
-        raise SystemExit(f'manifesto ausente: {caminho}')
+        raise SystemExit('comparação NÃO VERIFICADA (manifesto ausente): ' + str(caminho) + '\n'
+                         'rode dentro da Fábrica, onde referencias/openwa-sha256.txt existe')
     return {linha.split()[0] for linha in caminho.read_text(encoding='utf-8').splitlines() if linha.strip()}
 
 
