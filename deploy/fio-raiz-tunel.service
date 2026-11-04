@@ -5,9 +5,9 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/ssh -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=20 -o ServerAliveCountMax=3 -R 2794:127.0.0.1:2793 mac
+ExecStart=/usr/bin/ssh -N -o BatchMode=yes -o ConnectTimeout=10 -o ExitOnForwardFailure=yes -o ServerAliveInterval=20 -o ServerAliveCountMax=3 -R 2794:127.0.0.1:2793 mac
 Restart=always
-RestartSec=5
+RestartSec=15
 SyslogIdentifier=fio-raiz-tunel
 
 [Install]

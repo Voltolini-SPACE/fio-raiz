@@ -31,6 +31,11 @@ curl -s -H "x-api-key: $CHAVE" -X POST -H 'content-type: application/json' \
   -d '{"nome":"Atendimento"}' http://127.0.0.1:2790/api/sessions
 ```
 
+## Rodar sem interrupções
+
+Units systemd prontas em [`deploy/`](deploy/): `fio-raiz.service` (gateway, `Restart=always`) e
+`fio-raiz-tunel.service` (túnel do Mac). Instruções em [`deploy/README.md`](deploy/README.md).
+
 ## O que já funciona
 
 Sessões com ciclo de vida (criar, iniciar, parar, parear, status, QR), envio de

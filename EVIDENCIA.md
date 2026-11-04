@@ -169,3 +169,28 @@ Gate da Fábrica reexecutado sobre a entrega: `aprovado: true`, zero categorias.
 **NÃO VERIFICADO** nesta rodada: reconexão após queda real de rede, download do
 binário de mídia, recibo de leitura, TLS/proxy (fora de escopo por design) e SSR F
 de mídia no caminho Baileys (código revisado, não explorado em execução).
+
+## Operação contínua (04/11/2026)
+
+Pergunta: o que falta para rodar sem interrupção? Medido nesta Spark.
+
+| Antes | Depois | Prova |
+|---|---|---|
+| processo solto, sem unit | `fio-raiz.service` com `Restart=always` | `kill -9` no PID: volta em 2 s, `uptime_s:2` |
+| restart deixava a sessão `parada` | boot retoma a sessão que estava `conectada` | após a unit subir: `estado=conectada` sem chamar `/start` |
+| 5 quedas de rede viravam `erro` permanente | contador zera ao abrir conexão | teste `seis quedas não viram erro` |
+| `npm ci` apagava o Baileys | `optionalDependencies: 7.0.0-rc14` | clone + `npm ci` → `makeWASocket: function`; `--omit=optional` → sem Baileys |
+| túnel do Mac manual | `fio-raiz-tunel.service` com `Restart=always` | unit ativa; Mac fora do ar no momento (`No route to host`), então 2794 **NÃO VERIFICADO** |
+
+```
+$ systemctl --user show fio-raiz -p Restart -p MainPID --value
+always
+1638201
+$ curl -s http://127.0.0.1:2793/api/health
+{"estado":"ok","servico":"fio-raiz","versao":"0.1.0","uptime_s":2,...}
+$ npm test
+ℹ tests 70  ℹ pass 70  ℹ fail 0
+$ npx tsc --noEmit   # rc 0
+```
+
+Fábrica: `ciclo --revalidar` → `pronto: true`, rodada 4, 0 pendências, 1 aviso (frentes).
