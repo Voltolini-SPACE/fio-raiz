@@ -33,13 +33,31 @@ curl -s -H "x-api-key: $CHAVE" -X POST -H 'content-type: application/json' \
 Sessões com ciclo de vida (criar, iniciar, parar, parear, status, QR), envio de
 texto e mídia, listagem paginada, contatos, etiquetas, grupos, webhooks com
 entrega e histórico de falha, busca, estatísticas, configurações, chaves de API,
-MCP e painel. O ensaio real está em [EVIDENCIA.md](EVIDENCIA.md).
+MCP e painel. Há um **motor real de WhatsApp** opcional (Baileys, carregado por
+`import()` dinâmico) que emite QR de verdade e recebe mensagens; o padrão continua
+sendo o motor simulado, sem rede. O ensaio real está em [EVIDENCIA.md](EVIDENCIA.md).
+
+## Motor real (opcional)
+
+```bash
+npm i baileys@7.0.0-rc14      # não entra em dependencies; é opt-in explícito
+FIO_RAIZ_MOTOR=baileys npm start
+```
+
+Criar sessão com `"motor":"baileys"`, chamar `/start` e ler `/qr` devolve o QR
+emitido pelo WhatsApp. O adaptador reconecta com espera exponencial e desiste em
+`401/403/405` (aparelho deslogado). Sessão fica em `data/sessoes/<id>/auth`.
+
+**Risco declarado:** conexão não oficial viola os termos do WhatsApp e pode levar
+o número a bloqueio. Use um número dedicado. A conexão completa depende de ler o
+QR com um aparelho — verificado até a emissão do QR, não além.
 
 ## Limites declarados
 
-- O transporte de WhatsApp é uma **porta** com implementação `simulado`
-  (`src/motor/`). Não há biblioteca de WhatsApp embutida; o adaptador real é
-  trabalho futuro declarado em [PARIDADE.md](PARIDADE.md).
+- O transporte real não é dependência do produto: sem `baileys` instalado, o
+  motor simulado segue sendo o padrão e o adaptador responde `motor_indisponivel`
+  com a instrução de instalação. A conexão com um celular de verdade não foi
+  verificada — só a emissão do QR pelo servidor do WhatsApp.
 - Plugins, ingress, integrações, exportação/importação, métricas Prometheus e
   auditoria não estão implementados — cada rota aparece em PARIDADE.md como
   `excluído`, com data.

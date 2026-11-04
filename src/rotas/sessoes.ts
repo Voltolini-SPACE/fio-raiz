@@ -17,9 +17,9 @@ export const rotasSessoes: Rota[] = [
     svc.iniciarSessao(banco, motor, params.id as string) },
   { metodo: 'POST', padrao: '/api/sessions/:id/stop', tratar: async ({ banco, motor, params }) =>
     svc.pararSessao(banco, motor, params.id as string) },
-  { metodo: 'POST', padrao: '/api/sessions/:id/pair', tratar: ({ banco, params, corpo }) => {
+  { metodo: 'POST', padrao: '/api/sessions/:id/pair', tratar: async ({ banco, motor, params, corpo }) => {
     const dados = dadosDe(corpo);
-    return svc.parearSessao(banco, params.id as string, texto(dados.numero, 'numero', { max: 20 }));
+    return svc.parearSessao(banco, motor, params.id as string, texto(dados.numero, 'numero', { max: 20 }));
   } },
   { metodo: 'GET', padrao: '/api/sessions/:id/status', tratar: ({ banco, params }) => svc.statusSessao(banco, params.id as string) },
   { metodo: 'GET', padrao: '/api/sessions/:id/qr', tratar: ({ banco, params }) => svc.qrDaSessao(banco, params.id as string) },

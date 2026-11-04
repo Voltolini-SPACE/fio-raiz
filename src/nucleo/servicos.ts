@@ -2,6 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import type { Banco } from './banco.ts';
 import { agora } from './banco.ts';
 import { ErroHttp, conflito, invalido, naoEncontrado } from './erros.ts';
+import type { MensagemEntrada } from '../motor/eventos.ts';
 import type { Motor } from '../motor/porta.ts';
 
 const id = (p: string) => `${p}_${randomUUID()}`;
@@ -56,8 +57,8 @@ export async function iniciarSessao(banco: Banco, motor: Motor, sessaoId: string
   banco.prepare('UPDATE sessoes SET estado = ?, atualizada_em = ? WHERE id = ?')
     .run('iniciando', agora(), sessaoId);
   const resultado = await motor.iniciar(sessaoId);
-  banco.prepare('UPDATE sessoes SET estado = ?, qr = ?, atualizada_em = ? WHERE id = ?')
-    .run(resultado.estado, resultado.qr ?? sessao.qr, agora(), sessaoId);
+  banco.prepare('UPDATE sessoes SET estado = ?, qr = COALESCE(?, qr), atualizada_em = ? WHERE id = ?')
+    .run(resultado.estado, resultado.qr ?? null, agora(), sessaoId);
   return umaSessao(banco, sessaoId);
 }
 
@@ -69,12 +70,31 @@ export async function pararSessao(banco: Banco, motor: Motor, sessaoId: string):
   return umaSessao(banco, sessaoId);
 }
 
-/** Conexão com número: no motor simulado é o que fecha o ciclo; no real viria do pareamento. */
-export function parearSessao(banco: Banco, sessaoId: string, numero: string): Sessao {
+/** Estado vindo do motor real (QR, conexão, queda) gravado na sessão. */
+export function registrarEstado(banco: Banco, sessaoId: string, estado: string, qr: string | null): void {
+  banco.prepare('UPDATE sessoes SET estado = ?, qr = COALESCE(?, qr), atualizada_em = ? WHERE id = ?')
+    .run(estado, qr, agora(), sessaoId);
+}
+
+/** Mensagem recebida do WhatsApp: entra na conversa e dispara `message.recebida`. */
+export function registrarEntrada(banco: Banco, sessaoId: string, mensagem: MensagemEntrada): void {
+  if (!banco.prepare('SELECT 1 FROM sessoes WHERE id = ?').get(sessaoId)) return;
+  banco.prepare(`INSERT OR IGNORE INTO mensagens (id, sessao_id, direcao, conversa, tipo, corpo, midia, estado, criada_em)
+                 VALUES (?, ?, 'entrada', ?, ?, ?, ?, 'recebida', ?)`)
+    .run(mensagem.id, sessaoId, mensagem.conversa, mensagem.tipo, mensagem.corpo, mensagem.midia,
+      new Date(mensagem.recebida_em).toISOString());
+  void dispararEvento(banco, 'message.recebida', { sessao_id: sessaoId, mensagem }).catch(() => undefined);
+}
+
+/** Pareamento: com motor real pede o código ao WhatsApp; no simulado fecha o ciclo local. */
+export async function parearSessao(banco: Banco, motor: Motor, sessaoId: string, numero: string): Promise<Sessao & { codigo?: string }> {
   umaSessao(banco, sessaoId);
+  const codigo = motor.parear ? await motor.parear(sessaoId, numero) : null;
+  const estado = codigo ? 'aguardando_qr' : 'conectada';
   banco.prepare('UPDATE sessoes SET estado = ?, numero = ?, atualizada_em = ? WHERE id = ?')
-    .run('conectada', numero, agora(), sessaoId);
-  return umaSessao(banco, sessaoId);
+    .run(estado, numero, agora(), sessaoId);
+  const sessao = umaSessao(banco, sessaoId);
+  return codigo ? { ...sessao, codigo: codigo.codigo } : sessao;
 }
 
 export function statusSessao(banco: Banco, sessaoId: string) {

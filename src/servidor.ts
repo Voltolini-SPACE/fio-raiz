@@ -4,7 +4,10 @@ import { dirname, resolve } from 'node:path';
 import { abrirBanco } from './nucleo/banco.ts';
 import { chaveValida, semearChave } from './nucleo/chaves.ts';
 import { ErroHttp, naoAutorizado } from './nucleo/erros.ts';
-import { MotorSimulado } from './motor/simulado.ts';
+import type { Motor } from './motor/porta.ts';
+import type { ObservadorMotor } from './motor/baileys.ts';
+import { criarMotor } from './motor/selecao.ts';
+import * as svc from './nucleo/servicos.ts';
 import { procurar, type Rota } from './http/roteador.ts';
 import { rotas as rotasDaCasa } from './rotas/index.ts';
 import { atenderMcp } from './mcp/servidor.ts';
@@ -14,11 +17,19 @@ const PORTA = Number(process.env.PORT ?? 2790);
 const PASTA_DADOS = process.env.FIO_RAIZ_DATA ?? resolve(AQUI, '..', 'data');
 const LIMITE_CORPO = 1_000_000;
 
-export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorSimulado } = {}) {
+export type MotorOuFabrica = Motor | ((observador: ObservadorMotor) => Motor);
+
+export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFabrica } = {}) {
   const pasta = opcoes.pastaDados ?? PASTA_DADOS;
   const banco = abrirBanco(pasta);
   const semente = semearChave(banco, pasta === ':memory:' ? resolve(AQUI, '..', 'data') : pasta);
-  const motor = opcoes.motor ?? new MotorSimulado();
+  const observador: ObservadorMotor = {
+    aoMudarEstado: (sessaoId, estado, qr) => svc.registrarEstado(banco, sessaoId, estado, qr),
+    aoReceber: (sessaoId, mensagem) => svc.registrarEntrada(banco, sessaoId, mensagem),
+  };
+  const motor = typeof opcoes.motor === 'function'
+    ? opcoes.motor(observador)
+    : opcoes.motor ?? criarMotor({ pastaDados: pasta, observador });
   const rotas: Rota[] = [...rotasDaCasa,
     { metodo: 'POST', padrao: '/mcp', publica: true, tratar: (c) => atenderMcp(c) }];
 

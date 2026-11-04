@@ -7,4 +7,6 @@ export interface Motor {
   parar(sessaoId: string): Promise<EstadoSessao>;
   enviarTexto(sessaoId: string, conversa: string, corpo: string): Promise<{ id: string }>;
   enviarMidia(sessaoId: string, conversa: string, midia: string, legenda?: string): Promise<{ id: string }>;
+  /** Opcional: só motores reais com pareamento por código implementam. */
+  parear?(sessaoId: string, numero: string): Promise<{ codigo: string } | null>;
 }

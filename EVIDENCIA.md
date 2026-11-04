@@ -71,3 +71,26 @@ colisoes: 0
 
 Nenhum arquivo do produto coincide com qualquer arquivo do alvo: prova técnica de não cópia,
 complementar ao registro de contato prévio em RASTREABILIDADE.md.
+
+## Transporte real de WhatsApp (2026-11-04)
+
+Ambiente: `spark-1ec1`, Node v24.20.0, porta 2793, `FIO_RAIZ_MOTOR=baileys`,
+`FIO_RAIZ_DATA=/tmp/fio-raiz-live`.
+
+```
+npm i --no-save baileys@7.0.0-rc14   # 70 pacotes; package.json intocado
+POST /api/sessions                    {"motor":"baileys","estado":"criada"}
+POST /api/sessions/<id>/start         estado=aguardando_qr  (779 ms)
+GET  /api/sessions/<id>/qr            estado=aguardando_qr  qr_len=277
+                                      prefixo https://wa.me/settings/linked_devices#2@
+npm test                              42 testes, 42 verdes, 0 falhas
+npx tsc --noEmit                      sem erros
+```
+
+O QR acima foi emitido pelo servidor do WhatsApp e servido pela nossa API; nenhum
+telefone foi lido. **NÃO VERIFICADO:** conexão completa com um aparelho, recebimento
+de mensagem real e reconexão contra queda real de rede — dependem de ler o QR num
+celular. Recebimento e envio estão cobertos por teste com socket falso
+(`testes/motor-http.test.ts`).
+
+Risco declarado: conexão não oficial, sujeita a bloqueio do número.

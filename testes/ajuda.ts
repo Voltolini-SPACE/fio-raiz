@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { AddressInfo } from 'node:net';
-import { criarAplicacao } from '../src/servidor.ts';
+import { criarAplicacao, type MotorOuFabrica } from '../src/servidor.ts';
 
 export interface Aplicacao {
   url: string;
@@ -12,9 +12,9 @@ export interface Aplicacao {
   fechar: () => Promise<void>;
 }
 
-export async function subir(): Promise<Aplicacao> {
-  const pasta = mkdtempSync(join(tmpdir(), 'fio-raiz-teste-'));
-  const app = criarAplicacao({ pastaDados: pasta });
+export async function subir(opcoes: { pasta?: string; motor?: MotorOuFabrica } = {}): Promise<Aplicacao> {
+  const pasta = opcoes.pasta ?? mkdtempSync(join(tmpdir(), 'fio-raiz-teste-'));
+  const app = criarAplicacao({ pastaDados: pasta, motor: opcoes.motor });
   await new Promise<void>((ok) => app.servidor.listen(0, '127.0.0.1', ok));
   const { port } = app.servidor.address() as AddressInfo;
   const url = `http://127.0.0.1:${port}`;

@@ -45,7 +45,7 @@ curl -s -H "x-api-key: $CHAVE" -H 'content-type: application/json' \
 curl -s -X POST -H "x-api-key: $CHAVE" http://127.0.0.1:2790/api/sessions/<id>/start
 # ver QR
 curl -s -H "x-api-key: $CHAVE" http://127.0.0.1:2790/api/sessions/<id>/qr
-# parear número
+# parear número (motor real devolve código; simulado conecta direto)
 curl -s -X POST -H "x-api-key: $CHAVE" -H 'content-type: application/json' \
   -d '{"numero":"5511999998888"}' http://127.0.0.1:2790/api/sessions/<id>/pair
 # enviar texto
@@ -57,7 +57,28 @@ curl -s -X POST -H "x-api-key: $CHAVE" -H 'content-type: application/json' \
 `send-media` aceita `midia` como URL `http(s)` ou `data:` e `legenda` opcional.
 Enviar em sessão que não está `conectada` responde `409`.
 
-## 5. Webhooks
+## 5. Transporte real (opcional)
+
+```bash
+npm i baileys@7.0.0-rc14
+FIO_RAIZ_MOTOR=baileys FIO_RAIZ_DATA=./data npm start
+```
+
+1. Crie a sessão com `"motor":"baileys"`.
+2. `POST /api/sessions/<id>/start` devolve `aguardando_qr` e grava o QR.
+3. Abra o WhatsApp no celular → Aparelhos conectados → Conectar aparelho → leia o QR.
+4. `GET /api/sessions/<id>/status` muda para `conectada`; envios passam a sair.
+5. Mensagens recebidas entram em `GET /api/sessions/<id>/messages` e disparam o
+   webhook `message.recebida`.
+6. Sem celular, `POST .../pair` com o número devolve um código de 8 caracteres
+   para digitar no aparelho.
+
+Diagnóstico: `data/sessoes/<id>/auth` guarda a credencial (nunca versione). Queda de
+rede reconecta sozinha (1s, 2s, 4s… até 5 tentativas); `401/403/405` vai para `erro`
+e exige novo pareamento. **Risco:** conexão não oficial, sujeita a bloqueio do
+número; use um número dedicado.
+
+## 6. Webhooks
 
 ```bash
 curl -s -X POST -H "x-api-key: $CHAVE" -H 'content-type: application/json' \
@@ -69,7 +90,7 @@ Cada entrega leva o cabeçalho `x-fio-assinatura` com o segredo do webhook
 (`whsec_…`, devolvido só na criação). São duas tentativas por evento; o
 resultado fica em `GET /api/webhooks/delivery-failures`. `eventos` aceita `*`.
 
-## 6. MCP
+## 7. MCP
 
 O cliente fala JSON-RPC 2.0 em `POST /mcp` com `x-api-key`:
 
@@ -84,12 +105,12 @@ resultado de cada ensaio. Ferramentas: `HealthGet`, `SessionFindAll`,
 `SessionGetStats`, `MessageFindAll`, `MessageSendText`, `WebhooksList`,
 `ContactFindAll`, `LabelFindAll`, `GroupFindAll`, `SettingsGet`.
 
-## 7. Painel
+## 8. Painel
 
 `http://127.0.0.1:2790/painel` — abra, cole a chave e clique em **Carregar**.
 Mostra visão geral, sessões e webhooks. É leitura; escrita é pela API ou MCP.
 
-## 8. Backup e diagnóstico
+## 9. Backup e diagnóstico
 
 - Banco: copie `data/fio-raiz.sqlite` (e `-wal`, `-shm`) com o serviço parado,
   ou use `sqlite3 data/fio-raiz.sqlite ".backup /destino/fio-raiz.sqlite"`.
@@ -100,7 +121,7 @@ Mostra visão geral, sessões e webhooks. É leitura; escrita é pela API ou MCP
 - Sintoma `500 falha_interna`: a mensagem vem no JSON; os testes cobrem o
   caminho felizes e os erros nomeados (`npm test`).
 
-## 9. Atualizar
+## 10. Atualizar
 
 `git pull && npm ci && npm test && npm start`. Não há migração destrutiva: o
 esquema usa `CREATE TABLE IF NOT EXISTS` e roda a cada partida.
