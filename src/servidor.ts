@@ -10,7 +10,7 @@ import { criarMotor } from './motor/selecao.ts';
 import * as svc from './nucleo/servicos.ts';
 import { procurar, type Rota } from './http/roteador.ts';
 import { rotas as rotasDaCasa } from './rotas/index.ts';
-import { atenderMcp } from './mcp/servidor.ts';
+import { atenderMcp, SEM_CORPO } from './mcp/servidor.ts';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const PORTA = Number(process.env.PORT ?? 2790);
@@ -27,11 +27,18 @@ export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFab
     aoMudarEstado: (sessaoId, estado, qr) => svc.registrarEstado(banco, sessaoId, estado, qr),
     aoReceber: (sessaoId, mensagem) => svc.registrarEntrada(banco, sessaoId, mensagem),
   };
+  svc.reposicionarSessoes(banco);
   const motor = typeof opcoes.motor === 'function'
     ? opcoes.motor(observador)
     : opcoes.motor ?? criarMotor({ pastaDados: pasta, observador });
+  const recusarMetodo = (c: { res: ServerResponse }) => {
+    c.res.setHeader('allow', 'POST');
+    throw new ErroHttp(405, 'metodo_nao_permitido', 'MCP aceita apenas POST');
+  };
   const rotas: Rota[] = [...rotasDaCasa,
-    { metodo: 'POST', padrao: '/mcp', publica: true, tratar: (c) => atenderMcp(c) }];
+    { metodo: 'POST', padrao: '/mcp', publica: true, tratar: (c) => atenderMcp(c) },
+    { metodo: 'GET', padrao: '/mcp', publica: true, tratar: recusarMetodo },
+    { metodo: 'DELETE', padrao: '/mcp', publica: true, tratar: recusarMetodo }];
 
   async function lerCorpo(req: IncomingMessage): Promise<unknown> {
     if (req.method === 'GET' || req.method === 'DELETE') return null;
@@ -61,8 +68,18 @@ export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFab
     res.end(texto);
   }
 
+  const falhasPorIp = new Map<string, { n: number; inicio: number }>();
   const servidor = createServer(async (req, res) => {
-    const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+    // Nunca confie no header Host: base fixa evita TypeError que derrubava o processo.
+    let url: URL;
+    try {
+      url = new URL(req.url ?? '/', 'http://127.0.0.1');
+    } catch {
+      res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ erro: 'pedido_invalido', mensagem: 'alvo HTTP mal formado' }));
+      return;
+    }
+    const ip = req.socket.remoteAddress ?? 'local';
     const caminho = url.pathname.replace(/\/+$/, '') || '/';
     const metodo = (req.method ?? 'GET').toUpperCase() as Rota['metodo'];
     try {
@@ -70,16 +87,36 @@ export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFab
       if (!encontrada) throw new ErroHttp(404, 'rota_desconhecida', `rota ${metodo} ${caminho} não existe`);
       const apresentada = req.headers['x-api-key'];
       const chaveApresentada = typeof apresentada === 'string' ? apresentada : undefined;
-      if (!encontrada.rota.publica && !chaveValida(banco, chaveApresentada)) throw naoAutorizado();
+      // /mcp também autentica antes de ler o corpo: 1 MB de payload não chega sem chave.
+      const exigeChave = !encontrada.rota.publica || caminho === '/mcp';
+      if (exigeChave && !chaveValida(banco, chaveApresentada)) throw naoAutorizado();
       const corpo = await lerCorpo(req);
       const saida = await encontrada.rota.tratar({
         req, res, params: encontrada.params, query: url.searchParams, corpo, banco, motor,
-        chaveApresentada,
+        chaveApresentada, pastaDados: pasta,
       });
+      falhasPorIp.delete(ip);
       if (res.headersSent) return;
+      if (saida === SEM_CORPO) {
+        res.writeHead(202, { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' });
+        res.end();
+        return;
+      }
       responder(res, 200, saida);
     } catch (erro) {
       if (erro instanceof ErroHttp) {
+        if (erro.codigo === 401) {
+          const agoraMs = Date.now();
+          const atual = falhasPorIp.get(ip);
+          if (!atual || agoraMs - atual.inicio > 60_000) falhasPorIp.set(ip, { n: 1, inicio: agoraMs });
+          else atual.n += 1;
+          const total = falhasPorIp.get(ip)?.n ?? 0;
+          if (total > 20) {
+            responder(res, 429, { erro: 'muitas_tentativas', mensagem: 'aguarde um minuto' });
+            return;
+          }
+          res.setHeader('www-authenticate', 'ApiKey realm="fio-raiz"');
+        }
         responder(res, erro.codigo, { erro: erro.tipo, mensagem: erro.message });
         return;
       }
@@ -88,7 +125,9 @@ export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFab
         responder(res, 503, { erro: 'motor_indisponivel', mensagem });
         return;
       }
-      responder(res, 500, { erro: 'falha_interna', mensagem });
+      // Detalhe interno fica no servidor; o cliente recebe só o tipo do erro.
+      console.error('[fio-raiz] falha interna:', erro instanceof Error ? erro.stack : erro);
+      responder(res, 500, { erro: 'falha_interna', mensagem: 'falha interna do servidor' });
     }
   });
 

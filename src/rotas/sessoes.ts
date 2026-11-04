@@ -12,7 +12,8 @@ export const rotasSessoes: Rota[] = [
       textoOpcional(dados.motor, 'motor', { max: 40 }) ?? 'simulado');
   } },
   { metodo: 'GET', padrao: '/api/sessions/:id', tratar: ({ banco, params }) => svc.obterSessao(banco, params.id as string) },
-  { metodo: 'DELETE', padrao: '/api/sessions/:id', tratar: ({ banco, params }) => svc.removerSessao(banco, params.id as string) },
+  { metodo: 'DELETE', padrao: '/api/sessions/:id', tratar: ({ banco, params, pastaDados }) =>
+    svc.removerSessao(banco, params.id as string, pastaDados) },
   { metodo: 'POST', padrao: '/api/sessions/:id/start', tratar: async ({ banco, motor, params }) =>
     svc.iniciarSessao(banco, motor, params.id as string) },
   { metodo: 'POST', padrao: '/api/sessions/:id/stop', tratar: async ({ banco, motor, params }) =>

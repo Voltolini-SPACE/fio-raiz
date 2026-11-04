@@ -17,7 +17,7 @@ sem dependências de produção, em Node 24 + TypeScript e SQLite embutido.
 ```bash
 git clone https://github.com/Voltolini-SPACE/fio-raiz && cd fio-raiz
 npm ci            # só ferramentas de desenvolvimento (typescript)
-npm test          # 23 testes, node --test
+npm test          # 64 testes, node --test
 npm start         # http://127.0.0.1:2790
 ```
 
@@ -48,12 +48,15 @@ FIO_RAIZ_MOTOR=baileys npm start
 
 Criar sessão com `"motor":"baileys"`, chamar `/start` e ler `/qr` devolve o QR
 emitido pelo WhatsApp. O adaptador reconecta com espera exponencial e desiste em
-`401/403/405` (aparelho deslogado). Sessão fica em `data/sessoes/<id>/auth`.
+`401/403/405` (aparelho deslogado). Sessão fica em `data/sessoes/<id>/auth`;
+depois de reiniciar o processo, as sessões voltam como `parada` e precisam de
+`/start` (a credencial é reaproveitada, QR não é pedido de novo).
 
 **Risco declarado:** conexão não oficial viola os termos do WhatsApp e pode levar
 o número a bloqueio. Use um número dedicado. Verificado em 04/11: QR emitido,
-aparelho conectado e mensagem real enviada; entrada de terceiros e recibo de
-leitura ainda não foram verificados.
+aparelho conectado, mensagem real enviada e 46 mensagens recebidas de terceiros.
+Reconexão após queda de rede, download do binário de mídia e recibo de leitura
+continuam **NÃO VERIFICADOS**.
 
 ## Pré-requisitos externos
 
@@ -92,6 +95,6 @@ Licença MIT — [LICENSE](LICENSE) · [NOTICE](NOTICE).
 
 ## Qualidade
 
-`npm test` (45 testes) e `npm run check` (`tsc --noEmit`) rodam no CI a cada
+`npm test` (64 testes) e `npm run check` (`tsc --noEmit`) rodam no CI a cada
 push; o badge acima mostra o estado. Sem `baileys` instalado a suíte passa e o
 `/start` responde `503 motor_indisponivel` com o comando de instalação.

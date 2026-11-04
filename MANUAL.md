@@ -75,7 +75,8 @@ FIO_RAIZ_MOTOR=baileys FIO_RAIZ_DATA=./data npm start
 
 Diagnóstico: `data/sessoes/<id>/auth` guarda a credencial (nunca versione). Queda de
 rede reconecta sozinha (1s, 2s, 4s… até 5 tentativas); `401/403/405` vai para `erro`
-e exige novo pareamento. **Risco:** conexão não oficial, sujeita a bloqueio do
+e exige novo pareamento. Reinício do processo devolve a sessão a `parada` — chame
+`POST /api/sessions/<id>/start` para retomar com a credencial salva. **Risco:** conexão não oficial, sujeita a bloqueio do
 número; use um número dedicado.
 
 ## 6. Webhooks
@@ -86,9 +87,12 @@ curl -s -X POST -H "x-api-key: $CHAVE" -H 'content-type: application/json' \
   http://127.0.0.1:2790/api/webhooks
 ```
 
-Cada entrega leva o cabeçalho `x-fio-assinatura` com o segredo do webhook
-(`whsec_…`, devolvido só na criação). São duas tentativas por evento; o
-resultado fica em `GET /api/webhooks/delivery-failures`. `eventos` aceita `*`.
+Cada entrega leva `x-fio-assinatura: sha256=<hex>`, HMAC-SHA256 do corpo com o
+segredo do webhook (`whsec_…`, devolvido só na criação) — valide com
+`crypto.timingSafeEqual` antes de confiar no evento. Só destinos públicos são
+aceitos: loopback, rede privada e `169.254.169.254` são recusados com 400 (SSRF).
+São duas tentativas por evento; o resultado fica em
+`GET /api/webhooks/delivery-failures`. `eventos` aceita `*`.
 
 ## 7. MCP
 

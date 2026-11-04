@@ -1,7 +1,10 @@
-import { randomBytes, randomUUID } from 'node:crypto';
+import { createHmac, randomBytes, randomUUID } from 'node:crypto';
+import { rmSync } from 'node:fs';
+import { join } from 'node:path';
 import type { Banco } from './banco.ts';
 import { agora } from './banco.ts';
 import { ErroHttp, conflito, invalido, naoEncontrado } from './erros.ts';
+import { validarUrlPublica } from './validar.ts';
 import type { MensagemEntrada } from '../motor/eventos.ts';
 import type { Motor } from '../motor/porta.ts';
 
@@ -18,8 +21,11 @@ function umaSessao(banco: Banco, sessaoId: string): Sessao {
   return linha;
 }
 
-export function listarSessoes(banco: Banco): Sessao[] {
-  return banco.prepare('SELECT * FROM sessoes ORDER BY criada_em DESC').all() as unknown as Sessao[];
+const COLUNAS_PUBLICAS = 'id, nome, motor, estado, numero, criada_em, atualizada_em';
+
+export function listarSessoes(banco: Banco): Array<Omit<Sessao, 'qr'>> {
+  return banco.prepare(`SELECT ${COLUNAS_PUBLICAS} FROM sessoes ORDER BY criada_em DESC`)
+    .all() as unknown as Array<Omit<Sessao, 'qr'>>;
 }
 
 export function obterSessao(banco: Banco, sessaoId: string): Sessao {
@@ -38,7 +44,7 @@ export function criarSessao(banco: Banco, nome: string, motorNome = 'simulado'):
   return sessao;
 }
 
-export function removerSessao(banco: Banco, sessaoId: string): { removida: string } {
+export function removerSessao(banco: Banco, sessaoId: string, pastaDados?: string): { removida: string } {
   umaSessao(banco, sessaoId);
   for (const tabela of ['mensagens', 'contatos', 'etiquetas', 'grupos', 'webhooks']) {
     if (tabela === 'webhooks') {
@@ -48,6 +54,7 @@ export function removerSessao(banco: Banco, sessaoId: string): { removida: strin
     banco.prepare(`DELETE FROM ${tabela} WHERE sessao_id = ?`).run(sessaoId);
   }
   banco.prepare('DELETE FROM sessoes WHERE id = ?').run(sessaoId);
+  if (pastaDados) rmSync(join(pastaDados, 'sessoes', sessaoId), { recursive: true, force: true });
   return { removida: sessaoId };
 }
 
@@ -184,7 +191,7 @@ export function listarWebhooks(banco: Banco) {
 }
 
 export function criarWebhook(banco: Banco, url: string, eventos: string[], sessaoId?: string) {
-  if (!/^https?:\/\//.test(url)) throw invalido('url deve ser http(s)');
+  validarUrlPublica(url);
   if (eventos.length === 0) throw invalido('informe ao menos um evento');
   if (sessaoId) umaSessao(banco, sessaoId);
   const webhook = {
@@ -228,7 +235,10 @@ export async function dispararEvento(banco: Banco, evento: string, dados: unknow
       try {
         const resposta = await fetch(alvo.url, {
           method: 'POST',
-          headers: { 'content-type': 'application/json', 'x-fio-assinatura': alvo.segredo },
+          headers: {
+            'content-type': 'application/json',
+            'x-fio-assinatura': `sha256=${createHmac('sha256', alvo.segredo).update(carga).digest('hex')}`,
+          },
           body: carga,
           signal: AbortSignal.timeout(5000),
         });
@@ -252,6 +262,13 @@ export function buscar(banco: Banco, termo: string, limite = 25) {
   const contatos = banco.prepare('SELECT id, sessao_id, jid, nome FROM contatos WHERE nome LIKE ? LIMIT ?')
     .all(alvo, limite);
   return { termo, mensagens, contatos };
+}
+
+/** Processo novo não tem socket aberto: estado persistido vira `parada` para permitir /start. */
+export function reposicionarSessoes(banco: Banco): number {
+  const r = banco.prepare(`UPDATE sessoes SET estado = 'parada', qr = NULL, atualizada_em = ?
+                           WHERE estado IN ('conectada', 'iniciando', 'aguardando_qr')`).run(agora());
+  return Number(r.changes ?? 0);
 }
 
 export function visaoGeral(banco: Banco) {

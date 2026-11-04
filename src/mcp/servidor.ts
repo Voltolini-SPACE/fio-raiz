@@ -5,6 +5,9 @@ import * as svc from '../nucleo/servicos.ts';
 import { inteiro, jid, texto } from '../nucleo/validar.ts';
 
 export const PROTOCOLO = '2025-06-18';
+/** Sentinela: notificação não tem corpo de resposta (HTTP 202 vazio). */
+export const SEM_CORPO = Symbol('sem-corpo');
+const ORIGEM_LOCAL = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/;
 export const VERSAO = '0.1.0';
 
 interface Pedido { jsonrpc?: string; id?: unknown; method?: string; params?: Record<string, unknown> }
@@ -12,7 +15,7 @@ interface Pedido { jsonrpc?: string; id?: unknown; method?: string; params?: Rec
 type Ferramenta = {
   name: string; description: string;
   inputSchema: { type: 'object'; properties: Record<string, unknown>; required?: string[] };
-  executar: (c: Contexto, args: Record<string, unknown>) => unknown;
+  executar: (c: Contexto, args: Record<string, unknown>) => unknown | Promise<unknown>;
 };
 
 const FERRAMENTAS: Ferramenta[] = [
@@ -51,24 +54,38 @@ const FERRAMENTAS: Ferramenta[] = [
 
 const LISTA = FERRAMENTAS.map(({ name, description, inputSchema }) => ({ name, description, inputSchema }));
 
-export function atenderMcp(c: Contexto): unknown {
+export async function atenderMcp(c: Contexto): Promise<unknown> {
+  const tipo = String(c.req.headers['content-type'] ?? '');
+  if (!tipo.toLowerCase().startsWith('application/json')) {
+    throw new ErroHttp(415, 'content_type_invalido', 'use Content-Type: application/json');
+  }
+  const versao = c.req.headers['mcp-protocol-version'];
+  if (typeof versao === 'string' && versao !== PROTOCOLO) {
+    throw new ErroHttp(400, 'protocolo_incompativel', `este servidor fala ${PROTOCOLO}`);
+  }
+  const origem = c.req.headers.origin;
+  if (typeof origem === 'string' && !ORIGEM_LOCAL.test(origem)) {
+    throw new ErroHttp(403, 'origem_invalida', 'origem não permitida');
+  }
   if (!chaveValida(c.banco, c.chaveApresentada)) throw naoAutorizado('chave de API do MCP ausente ou inválida');
   const pedido = (c.corpo ?? {}) as Pedido;
   if (typeof pedido.method !== 'string') throw new ErroHttp(400, 'jsonrpc_invalido', 'method ausente');
+  if (pedido.method.startsWith('notifications/') && pedido.id === undefined) return SEM_CORPO;
   const base = { jsonrpc: '2.0', id: pedido.id ?? null };
   try {
-    const resultado = despachar(c, pedido.method, pedido.params ?? {});
+    const resultado = await despachar(c, pedido.method, pedido.params ?? {});
     return { ...base, result: resultado };
   } catch (erro) {
     if (erro instanceof ErroHttp) {
-      return { ...base, error: { code: -32602, message: `${erro.tipo}: ${erro.message}` } };
+      const code = erro.tipo === 'metodo_desconhecido' ? -32601 : -32602;
+      return { ...base, error: { code, message: `${erro.tipo}: ${erro.message}` } };
     }
-    const mensagem = erro instanceof Error ? erro.message : 'falha';
-    return { ...base, error: { code: -32603, message: mensagem.slice(0, 200) } };
+    console.error('[fio-raiz] falha no MCP:', erro instanceof Error ? erro.stack : erro);
+    return { ...base, error: { code: -32603, message: 'falha interna' } };
   }
 }
 
-function despachar(c: Contexto, metodo: string, params: Record<string, unknown>): unknown {
+async function despachar(c: Contexto, metodo: string, params: Record<string, unknown>): Promise<unknown> {
   if (metodo === 'initialize') {
     return {
       protocolVersion: PROTOCOLO,
@@ -83,7 +100,7 @@ function despachar(c: Contexto, metodo: string, params: Record<string, unknown>)
     const ferramenta = FERRAMENTAS.find((f) => f.name === nome);
     if (!ferramenta) throw new ErroHttp(404, 'ferramenta_desconhecida', nome);
     const args = (params.arguments ?? {}) as Record<string, unknown>;
-    const saida = ferramenta.executar(c, args);
+    const saida = await ferramenta.executar(c, args);
     return { content: [{ type: 'text', text: JSON.stringify(saida) }], isError: false };
   }
   throw new ErroHttp(400, 'metodo_desconhecido', metodo);

@@ -13,7 +13,7 @@ servidor, com API, MCP e painel no mesmo pacote.
 ## Voz
 
 - Direta, técnica, sem hype. Frases curtas. Nada de “revolucionário”.
-- Fala em resultado verificável: “23 testes passando”, não “robusto”.
+- Fala em resultado verificável: “64 testes passando”, não “robusto”.
 - Trata limite como informação: “o transporte real de WhatsApp ainda não está
   embutido”, não “em breve”.
 - Português do Brasil; termos de API em inglês (`sessionId`, `webhook`).
@@ -28,7 +28,7 @@ servidor, com API, MCP e painel no mesmo pacote.
 | Borda | `#CFE3D7` | divisórias, cartões |
 | Alerta | `#B4552B` | só erro e falha de entrega |
 
-Contraste do par Raiz/Papel: 5,4:1 (AA para texto normal). Não usar Raiz sobre
+Contraste do par Raiz/Papel: 4,98:1 (medido; AA para texto normal, 4,5:1 mínimo). Não usar Raiz sobre
 Tinta.
 
 ## Tipografia

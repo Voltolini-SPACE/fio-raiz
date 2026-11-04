@@ -50,7 +50,14 @@ document.getElementById('conectar').addEventListener('click', carregar);
 
 export const rotasPainel: Rota[] = [
   { metodo: 'GET', padrao: '/painel', publica: true, tratar: ({ res }) => {
-    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'x-content-type-options': 'nosniff' });
+    res.writeHead(200, {
+      'content-type': 'text/html; charset=utf-8',
+      'x-content-type-options': 'nosniff',
+      'x-frame-options': 'DENY',
+      'referrer-policy': 'no-referrer',
+      'cache-control': 'no-store',
+      'content-security-policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'",
+    });
     res.end(PAGINA);
     return null;
   } },

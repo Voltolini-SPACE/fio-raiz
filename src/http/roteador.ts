@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Banco } from '../nucleo/banco.ts';
 import type { Motor } from '../motor/porta.ts';
+import { ErroHttp } from '../nucleo/erros.ts';
 
 export interface Contexto {
   req: IncomingMessage;
@@ -11,6 +12,7 @@ export interface Contexto {
   banco: Banco;
   motor: Motor;
   chaveApresentada: string | undefined;
+  pastaDados: string;
 }
 
 export type Manipulador = (c: Contexto) => Promise<unknown> | unknown;
@@ -33,7 +35,8 @@ export function casar(padrao: string, caminho: string): Record<string, string> |
     const alvo = b[i] as string;
     if (parte.startsWith(':')) {
       if (!alvo) return null;
-      params[parte.slice(1)] = decodeURIComponent(alvo);
+      try { params[parte.slice(1)] = decodeURIComponent(alvo); }
+      catch { throw new ErroHttp(400, 'caminho_invalido', 'percentual mal formado no caminho'); }
     } else if (parte !== alvo) {
       return null;
     }

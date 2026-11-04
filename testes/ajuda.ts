@@ -4,11 +4,15 @@ import { join } from 'node:path';
 import type { AddressInfo } from 'node:net';
 import { criarAplicacao, type MotorOuFabrica } from '../src/servidor.ts';
 
+// Webhooks de teste apontam para um receptor em 127.0.0.1; o bloqueio de rede
+// privada vale para produção e é exercitado em testes/robustez.test.ts.
+process.env.FIO_RAIZ_WEBHOOK_LOCAL ??= '1';
+
 export interface Aplicacao {
   url: string;
   chave: string;
   pasta: string;
-  pedir: (rota: string, opcoes?: { metodo?: string; corpo?: unknown; chave?: string | null }) => Promise<Response>;
+  pedir: (rota: string, opcoes?: { metodo?: string; corpo?: unknown; chave?: string | null; cabecalhos?: Record<string, string>; bruto?: string }) => Promise<Response>;
   fechar: () => Promise<void>;
 }
 
@@ -23,13 +27,13 @@ export async function subir(opcoes: { pasta?: string; motor?: MotorOuFabrica } =
     chave: app.chave,
     pasta,
     pedir: (rota, opcoes = {}) => {
-      const cabecalhos: Record<string, string> = { 'content-type': 'application/json' };
+      const cabecalhos: Record<string, string> = { 'content-type': 'application/json', ...(opcoes.cabecalhos ?? {}) };
       const chave = opcoes.chave === undefined ? app.chave : opcoes.chave;
       if (chave) cabecalhos['x-api-key'] = chave;
       return fetch(url + rota, {
         method: opcoes.metodo ?? 'GET',
         headers: cabecalhos,
-        body: opcoes.corpo === undefined ? undefined : JSON.stringify(opcoes.corpo),
+        body: opcoes.bruto ?? (opcoes.corpo === undefined ? undefined : JSON.stringify(opcoes.corpo)),
       });
     },
     fechar: async () => {

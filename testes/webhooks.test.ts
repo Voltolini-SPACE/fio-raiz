@@ -1,12 +1,13 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer, type Server } from 'node:http';
+import { createHmac } from 'node:crypto';
 import type { AddressInfo } from 'node:net';
 import { subir, type Aplicacao } from './ajuda.ts';
 
 let app: Aplicacao;
 let receptor: Server;
-let recebidos: Array<{ evento: string; assinatura: string }> = [];
+let recebidos: Array<{ evento: string; assinatura: string; corpo: string }> = [];
 let endereco = '';
 
 before(async () => {
@@ -15,7 +16,11 @@ before(async () => {
     let corpo = '';
     req.on('data', (p) => { corpo += p; });
     req.on('end', () => {
-      recebidos.push({ evento: (JSON.parse(corpo) as { evento: string }).evento, assinatura: String(req.headers['x-fio-assinatura']) });
+      recebidos.push({
+        evento: (JSON.parse(corpo) as { evento: string }).evento,
+        assinatura: String(req.headers['x-fio-assinatura']),
+        corpo,
+      });
       res.writeHead(200).end('ok');
     });
   });
@@ -44,7 +49,8 @@ test('webhook recebe evento de mensagem enviada', async () => {
   await app.pedir(`/api/sessions/${sessao.id}/messages/send-text`, { metodo: 'POST', corpo: { para: '5511999998888', texto: 'oi' } });
   assert.equal(recebidos.length, 1);
   assert.equal(recebidos[0]?.evento, 'message.enviada');
-  assert.equal(recebidos[0]?.assinatura, segredo);
+  assert.equal(recebidos[0]?.assinatura,
+    `sha256=${createHmac('sha256', segredo).update(recebidos[0]?.corpo ?? '').digest('hex')}`);
   const falhas = await (await app.pedir('/api/webhooks/delivery-failures')).json() as { itens: unknown[] };
   assert.equal(falhas.itens.length, 0);
   assert.equal((await app.pedir(`/api/webhooks/${id}`, { metodo: 'DELETE' })).status, 200);
