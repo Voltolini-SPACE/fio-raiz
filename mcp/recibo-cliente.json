@@ -1,0 +1,50 @@
+{
+  "gate": "mcp-cliente-externo-v1",
+  "servidores": {
+    "fio-raiz": {
+      "confirmado": true,
+      "endpoint": "http://127.0.0.1:2791/mcp",
+      "transporte": "http+json",
+      "protocolo": "2025-06-18",
+      "server_info": {
+        "name": "fio-raiz",
+        "version": "0.1.0"
+      },
+      "ferramentas": [
+        "HealthGet",
+        "SessionFindAll",
+        "SessionGetStats",
+        "MessageFindAll",
+        "MessageSendText",
+        "WebhooksList",
+        "ContactFindAll",
+        "LabelFindAll",
+        "GroupFindAll",
+        "SettingsGet"
+      ],
+      "ensaios": [
+        {
+          "ferramenta": "SessionFindAll",
+          "ok": true,
+          "erro": null
+        },
+        {
+          "ferramenta": "WebhooksList",
+          "ok": true,
+          "erro": null
+        },
+        {
+          "ferramenta": "SessionGetStats",
+          "ok": true,
+          "erro": null
+        },
+        {
+          "ferramenta": "SettingsGet",
+          "ok": true,
+          "erro": null
+        }
+      ],
+      "observado_em": "2026-11-04T11:54:37+00:00"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+Fio Raiz
+Copyright (c) 2026 Voltolini Space
+
+Este produto é código próprio, escrito para o Fio Raiz, e é licenciado sob MIT
+(ver LICENSE). Nenhum código-fonte de outro produto foi copiado, derivado ou
+incorporado.
+
+A superfície HTTP pública (nomes de rota e formatos de entrada/saída) foi
+estudada a partir de contratos públicos e de comportamento observado, prática
+comum de interoperabilidade. Nomes de rota não são código e não carregam
+copyright de implementação. O produto não inclui, reproduz ou redistribui
+código, textos, ícones ou marca de terceiros.
+
+O parecer completo de origem está em RASTREABILIDADE.md; a comparação item a
+item com o contrato público está em PARIDADE.md.

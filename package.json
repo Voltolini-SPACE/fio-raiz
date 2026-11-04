@@ -1,0 +1,20 @@
+{
+  "name": "fio-raiz",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Gateway de WhatsApp auto-hospedado com API HTTP, MCP e painel — código próprio",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/servidor.ts",
+    "test": "node --test testes/*.test.ts",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.6.0"
+  }
+}
