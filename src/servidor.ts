@@ -19,11 +19,8 @@ export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorSimul
   const banco = abrirBanco(pasta);
   const semente = semearChave(banco, pasta === ':memory:' ? resolve(AQUI, '..', 'data') : pasta);
   const motor = opcoes.motor ?? new MotorSimulado();
-  const rotas: Rota[] = [...rotasDaCasa, ...rotasDoMcp()];
-
-  function rotasDoMcp(): Rota[] {
-    return [{ metodo: 'POST', padrao: '/mcp', publica: true, tratar: (c) => atenderMcp(c) }];
-  }
+  const rotas: Rota[] = [...rotasDaCasa,
+    { metodo: 'POST', padrao: '/mcp', publica: true, tratar: (c) => atenderMcp(c) }];
 
   async function lerCorpo(req: IncomingMessage): Promise<unknown> {
     if (req.method === 'GET' || req.method === 'DELETE') return null;
