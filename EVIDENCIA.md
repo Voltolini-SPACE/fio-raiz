@@ -119,3 +119,20 @@ não rastreia ack. A sessão ficou ativa em `data/sessoes/` para o teste de entr
 (`tsc --noEmit`) e `npm test`. Primeira execução: **run 41847084256**, commit
 `a4bc3a7`, conclusão verde; 45 testes no total. Sem `baileys` instalado a suíte
 passa e `/start` responde `503 motor_indisponivel` com o comando de instalação.
+
+## Entrada real (2026-11-04, 14:23–14:47 UTC)
+
+Com a sessão pareada, o WhatsApp entregou **46 mensagens** ao gateway sem
+intervenção: 45 de canais/grupos (`@newsletter`, `@g.us`) e 1 própria de saída.
+
+```
+GET /api/sessions/<id>/messages?limite=200
+  total 47 · entrada 46 · saida 1
+  tipos: texto, midia
+  primeira entrada 14:23:21 · última 14:47:28
+  mídia registrada como referência wa-media:<id> (conteúdo não baixado)
+```
+
+Isso fecha o caminho real de entrada (socket → tradução → SQLite → API). O
+conteúdo das mensagens não é reproduzido aqui: são mensagens de terceiros.
+**NÃO VERIFICADO** ainda: download do binário da mídia e recibo de leitura.
