@@ -202,10 +202,10 @@ falhava; a Spark e o Mac já estão no mesmo tailnet.
 
 | Verificação | Saída |
 |---|---|
-| `tailscale status` (Spark) | `spark-1ec1 100.105.131.93`, `macbook-pro 100.84.63.59 active` |
+| `tailscale status` (Spark) | `spark-1ec1 100.x.y.z`, `macbook-pro 100.a.b.c active` |
 | `tailscale ping ipad-10th-gen-wifi` | `pong ... via DERP(sao) in 121ms` |
 | `ssh mac hostname` (HostName = tailnet) | `MacBook-Pro-de-Voltolini-2.local` |
-| Do Mac: `curl http://100.105.131.93:2793/api/health` | `{"estado":"ok",...}` |
+| Do Mac: `curl http://100.x.y.z:2793/api/health` | `{"estado":"ok",...}` |
 | Do Mac: `/painel` | `200` |
 | Do Mac: `curl .../api/sessions` com chave | sessão `pareamento` `conectada` |
 | Do Mac: MCP `initialize` + `tools/list` | `serverInfo fio-raiz 0.1.0`, `tools=10` |
@@ -217,3 +217,17 @@ removida — o Tailscale a substitui.
 
 **NÃO VERIFICADO**: navegador no iPad e acesso físico fora da rede (o Mac está na LAN hoje);
 `tailscale serve` HTTPS exige habilitar no console do tailnet.
+
+## Tentativa de validação no iPad via Device Hub (04/11/2026, 14:16 BRT)
+
+Xcode 26 traz `DeviceHub.app` e o `xcrun devicectl`. O iPad está **pareado** ao Mac
+(`iPad de Jeferson`, UDID mascarado, `manualPairing`, `Last Connection 14:14`), mas o status é
+`unavailable` e tanto `device capture screenshot` quanto `device process launch` falham com
+`com.apple.dt.CoreDeviceError error 4016` (não consegue obter *power assertion*): o iPad não está
+na mesma rede do Mac (o `tailscale ping` do iPad sai por `DERP(sao)`, ou seja, fora da LAN) e não
+há cabo USB. CoreDevice não atravessa a internet — precisa de USB ou do mesmo Wi-Fi.
+`screencapture` no Mac via SSH também falha (`could not create image from display`, TCC).
+
+Conclusão: o Device Hub autoriza o Mac a falar com o iPad, mas só quando o iPad está alcançável
+(USB/LAN). A validação do Safari no iPad fica **NÃO VERIFICADO** por aqui; o caminho curto é abrir
+`/painel` no iPad (QR gerado em `docs/ipad-painel-qr.png`, fora do git).

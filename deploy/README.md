@@ -24,11 +24,11 @@ A Spark entra no tailnet como `spark-1ec1` e a unit escuta em `0.0.0.0` **com po
 | De onde | URL |
 |---|---|
 | Spark (local) | `http://127.0.0.1:2793` |
-| Mac, iPad, iPhone (tailnet) | `http://100.105.131.93:2793` |
+| Mac, iPad, iPhone (tailnet) | `http://100.x.y.z:2793` |
 | SSH para o Mac | `ssh mac` (HostName = IP do tailnet) |
 
 O painel abre em `/painel` e pede a chave de `data/.api-key`; o MCP é `POST /mcp` com
-`x-api-key`. Teste rápido do iPad: Safari em `http://100.105.131.93:2793/painel`, com o app
+`x-api-key`. Teste rápido do iPad: Safari em `http://100.x.y.z:2793/painel`, com o app
 Tailscale conectado.
 
 Para nome estável com HTTPS falta habilitar *Serve/HTTPS certificates* no console do

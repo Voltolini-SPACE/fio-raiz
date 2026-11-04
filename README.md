@@ -38,7 +38,7 @@ retomada no boot). Instruções em [`deploy/README.md`](deploy/README.md).
 
 ## Acesso remoto (Mac, iPad, Maestri)
 
-Pelo Tailscale: `http://100.105.131.93:2793` de qualquer rede, com portão
+Pelo Tailscale: `http://100.x.y.z:2793` de qualquer rede, com portão
 `FIO_RAIZ_ACESSO=tailnet` (só loopback e `100.64.0.0/10`; LAN/internet → 403). O painel
 `/painel` pede a chave; o MCP é `POST /mcp` com `x-api-key`. SSH para o Mac: `ssh mac`.
 
