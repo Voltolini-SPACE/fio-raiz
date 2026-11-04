@@ -51,8 +51,21 @@ emitido pelo WhatsApp. O adaptador reconecta com espera exponencial e desiste em
 `401/403/405` (aparelho deslogado). Sessão fica em `data/sessoes/<id>/auth`.
 
 **Risco declarado:** conexão não oficial viola os termos do WhatsApp e pode levar
-o número a bloqueio. Use um número dedicado. A conexão completa depende de ler o
-QR com um aparelho — verificado até a emissão do QR, não além.
+o número a bloqueio. Use um número dedicado. Verificado em 04/11: QR emitido,
+aparelho conectado e mensagem real enviada; entrada de terceiros e recibo de
+leitura ainda não foram verificados.
+
+## Pré-requisitos externos
+
+O que não vem do código e precisa existir antes de parear. O plano da edição
+(`planos/v3/voltolini-fio-raiz.json`, chave `dependencias_externas`) declara o
+mesmo mapa; o gate da Fábrica reprova plano ou entrega sem ele.
+
+| Dependência | Tipo | Quando | Risco | Alternativa |
+|---|---|---|---|---|
+| Conta WhatsApp com número dedicado | conta | antes | bloqueio ou banimento por conexão não oficial | motor simulado, sem conta |
+| Aparelho com WhatsApp para ler o QR | dispositivo | antes | precisa estar em mãos; o QR expira em segundos | pareamento por código de 8 dígitos |
+| Rede estável até os servidores do WhatsApp | rede | contínuo | queda derruba a sessão e exige reconexão | nenhuma |
 
 ## Limites declarados
 
