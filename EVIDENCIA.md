@@ -112,3 +112,10 @@ GET  /messages                   mensagem de saída gravada no histórico
 O envio chegou ao WhatsApp do próprio número (conversa "você"). **NÃO VERIFICADO:**
 recebimento de mensagem de outro aparelho e recibo de entrega/leitura — o produto
 não rastreia ack. A sessão ficou ativa em `data/sessoes/` para o teste de entrada.
+
+## CI (2026-11-04)
+
+`.github/workflows/ci.yml` a cada push em `main`: `npm ci`, `npm run check`
+(`tsc --noEmit`) e `npm test`. Primeira execução: **run 41847084256**, commit
+`a4bc3a7`, conclusão verde; 45 testes no total. Sem `baileys` instalado a suíte
+passa e `/start` responde `503 motor_indisponivel` com o comando de instalação.
