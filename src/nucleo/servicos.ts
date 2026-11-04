@@ -265,6 +265,11 @@ export function buscar(banco: Banco, termo: string, limite = 25) {
 }
 
 /** Processo novo não tem socket aberto: estado persistido vira `parada` para permitir /start. */
+export function sessoesConectadas(banco: Banco): string[] {
+  return (banco.prepare("SELECT id FROM sessoes WHERE estado = 'conectada' ORDER BY criada_em").all() as Array<{ id: string }>)
+    .map((linha) => linha.id);
+}
+
 export function reposicionarSessoes(banco: Banco): number {
   const r = banco.prepare(`UPDATE sessoes SET estado = 'parada', qr = NULL, atualizada_em = ?
                            WHERE estado IN ('conectada', 'iniciando', 'aguardando_qr')`).run(agora());

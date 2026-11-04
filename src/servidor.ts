@@ -27,10 +27,17 @@ export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFab
     aoMudarEstado: (sessaoId, estado, qr) => svc.registrarEstado(banco, sessaoId, estado, qr),
     aoReceber: (sessaoId, mensagem) => svc.registrarEntrada(banco, sessaoId, mensagem),
   };
+  const retomar = svc.sessoesConectadas(banco);
   svc.reposicionarSessoes(banco);
   const motor = typeof opcoes.motor === 'function'
     ? opcoes.motor(observador)
     : opcoes.motor ?? criarMotor({ pastaDados: pasta, observador });
+  for (const sessaoId of retomar) {
+    void motor.iniciar(sessaoId).then(
+      (r) => svc.registrarEstado(banco, sessaoId, r.estado, r.qr ?? null),
+      () => svc.registrarEstado(banco, sessaoId, 'erro', null),
+    );
+  }
   const recusarMetodo = (c: { res: ServerResponse }) => {
     c.res.setHeader('allow', 'POST');
     throw new ErroHttp(405, 'metodo_nao_permitido', 'MCP aceita apenas POST');

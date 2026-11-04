@@ -1,0 +1,25 @@
+[Unit]
+Description=Fio Raiz - gateway WhatsApp (API HTTP, MCP, painel)
+Documentation=https://github.com/Voltolini-SPACE/fio-raiz
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+WorkingDirectory=/home/voltolini-space/AI/voltolini-fio-raiz
+Environment=PORT=2793
+Environment=FIO_RAIZ_MOTOR=baileys
+Environment=FIO_RAIZ_DATA=/home/voltolini-space/AI/voltolini-fio-raiz/data
+ExecStart=/home/voltolini-space/.local/node-v24.20.0/bin/node src/servidor.ts
+Restart=always
+RestartSec=2
+KillSignal=SIGTERM
+TimeoutStopSec=10
+SyslogIdentifier=fio-raiz
+StandardOutput=journal
+StandardError=journal
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

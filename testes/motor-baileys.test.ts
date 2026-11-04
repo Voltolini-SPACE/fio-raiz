@@ -127,3 +127,17 @@ test('mídia em data: vira imagem com legenda', async () => {
   assert.ok(Buffer.isBuffer(conteudo.image));
   assert.equal(conteudo.caption, 'olha');
 });
+
+test('conexão aberta zera o contador: seis quedas não viram erro', async () => {
+  const c = cenario();
+  await c.motor.iniciar('s1');
+  for (let i = 0; i < 6; i += 1) {
+    const atual = c.sockets.at(-1)!;
+    atual.emitir('connection.update', { connection: 'open' });
+    atual.emitir('connection.update', { connection: 'close' });
+    assert.equal(c.agendados.length, i + 1, `queda ${i + 1} precisa reagendar`);
+    c.agendados.at(-1)!.fn();
+    await new Promise((r) => setTimeout(r, 5));
+  }
+  assert.ok(!c.eventos.some((e) => e.estado === 'erro'));
+});

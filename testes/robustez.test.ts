@@ -87,11 +87,11 @@ test('webhook assina com HMAC do corpo', async () => {
   } finally { receptor.close(); }
 });
 
-test('reinício devolve sessões ao estado parada', async () => {
+test('reinício devolve ao estado parada a sessão que estava lendo QR', async () => {
   const pasta = mkdtempSync(join(tmpdir(), 'fio-reinicio-'));
   const primeiro = criarAplicacao({ pastaDados: pasta });
   const sessao = svc.criarSessao(primeiro.banco, 'R');
-  primeiro.banco.prepare("UPDATE sessoes SET estado = 'conectada' WHERE id = ?").run(sessao.id);
+  primeiro.banco.prepare("UPDATE sessoes SET estado = 'aguardando_qr' WHERE id = ?").run(sessao.id);
   await new Promise<void>((ok) => primeiro.servidor.close(() => ok()));
   primeiro.banco.close();
   const segundo = criarAplicacao({ pastaDados: pasta });

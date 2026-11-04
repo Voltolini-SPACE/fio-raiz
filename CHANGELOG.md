@@ -3,6 +3,14 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versionamento: [SemVer](https://semver.org/lang/pt-BR/).
 
+## [Não publicado]
+
+### Operação contínua
+- Sessão que estava `conectada` é retomada no boot; `aguardando_qr` volta a `parada`.
+- Contador de reconexão zera ao abrir conexão: quedas esparsas não levam a `erro` permanente.
+- Baileys passou a `optionalDependencies` (`7.0.0-rc14`): `npm ci` preserva o motor real.
+- Units systemd em `deploy/` para o gateway (`Restart=always`) e para o túnel do Mac.
+
 ## [0.1.0] — 2026-11-04
 
 Primeira versão pública. Substitui o OpenWA para uso próprio: mesmo recorte de

@@ -156,6 +156,7 @@ export class MotorBaileys implements Motor {
   private atualizar(sessaoId: string, sessao: SessaoInterna, update: unknown): void {
     const traduzida = traduzirAtualizacao(update);
     if (traduzida.qr) { this.mudar(sessaoId, sessao, 'aguardando_qr', traduzida.qr); return; }
+    if (traduzida.estado === 'conectada') sessao.tentativas = 0;
     if (traduzida.estado) this.mudar(sessaoId, sessao, traduzida.estado, null);
     if (traduzida.reconectar) this.reconectar(sessaoId, sessao);
   }

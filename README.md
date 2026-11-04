@@ -9,14 +9,15 @@ sem dependências de produção, em Node 24 + TypeScript e SQLite embutido.
   grupos, webhooks, busca, estatísticas, configurações e chaves.
 - **MCP** em `POST /mcp` (JSON-RPC 2.0) com 10 ferramentas próprias.
 - **Painel** de leitura em `GET /painel`, sem build e sem framework.
-- **Zero dependências de produção**: `npm ci` não baixa runtime; o banco é
+- **Zero dependências obrigatórias**: o núcleo roda com `node:http` e `node:sqlite`; o Baileys é
+  `optionalDependency` (só o motor real usa) e `npm ci --omit=optional` continua sem runtime. O banco é
   `node:sqlite`, o servidor é `node:http`.
 
 ## Começar
 
 ```bash
 git clone https://github.com/Voltolini-SPACE/fio-raiz && cd fio-raiz
-npm ci            # só ferramentas de desenvolvimento (typescript)
+npm ci            # dev (typescript) + Baileys opcional; use --omit=optional para o motor simulado
 npm test          # 68 testes, node --test
 npm start         # http://127.0.0.1:2790
 ```
@@ -42,7 +43,7 @@ sendo o motor simulado, sem rede. O ensaio real está em [EVIDENCIA.md](EVIDENCI
 ## Motor real (opcional)
 
 ```bash
-npm i --no-save baileys@7.0.0-rc14   # --no-save: package.json continua sem dependências
+npm ci            # o Baileys já vem como dependência opcional
 FIO_RAIZ_MOTOR=baileys npm start
 ```
 
