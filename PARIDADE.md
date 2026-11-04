@@ -235,7 +235,7 @@ Tudo o que não aparece acima. Motivo comum: plugin/ingress/integração, export
 | Webhooks com entrega e histórico | implementado | testes/webhooks.test.ts |
 | MCP (initialize, tools/list, tools/call) | implementado, 10 ferramentas | testes/mcp.test.ts, mcp/recibo-cliente.json |
 | Painel | implementado, leitura | testes/painel.test.ts |
-| Transporte real de WhatsApp (Baileys, opt-in) | implementado até o QR; conexão com aparelho **não verificada** | `src/motor/baileys.ts`, testes/motor-baileys.test.ts, EVIDENCIA.md |
+| Transporte real de WhatsApp (Baileys, opt-in) | implementado; conexão e envio real verificados em 04/11; entrada de terceiros não verificada | `src/motor/baileys.ts`, testes/motor-baileys.test.ts, EVIDENCIA.md |
 | Plugins, ingress, integrações | excluído | — |
 | Métricas Prometheus, auditoria, exportação | excluído | — |
 | SDK e clientes oficiais | excluído | — |

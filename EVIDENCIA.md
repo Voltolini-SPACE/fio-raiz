@@ -94,3 +94,21 @@ celular. Recebimento e envio estão cobertos por teste com socket falso
 (`testes/motor-http.test.ts`).
 
 Risco declarado: conexão não oficial, sujeita a bloqueio do número.
+
+## Conexão real com aparelho (2026-11-04, 11:21 -03)
+
+O QR foi aberto no MacBook do dono (página servida por túnel SSH reverso) e lido
+no WhatsApp. Cronologia observada na mesma execução:
+
+```
+POST /start                      aguardando_qr
+GET  /qr (a cada 3 s)            QR renovado pelo WhatsApp
+status após ~24 s                conectada
+creds.me                         id 5547966•••02 (nome: Voltolini), platform smbi
+POST /messages/send-text         {"estado":"enviada"} · msg_b7ac9c3a-…
+GET  /messages                   mensagem de saída gravada no histórico
+```
+
+O envio chegou ao WhatsApp do próprio número (conversa "você"). **NÃO VERIFICADO:**
+recebimento de mensagem de outro aparelho e recibo de entrega/leitura — o produto
+não rastreia ack. A sessão ficou ativa em `data/sessoes/` para o teste de entrada.
