@@ -141,3 +141,31 @@ GET /api/sessions/<id>/messages?limite=200
 Isso fecha o caminho real de entrada (socket → tradução → SQLite → API). O
 conteúdo das mensagens não é reproduzido aqui: são mensagens de terceiros.
 **NÃO VERIFICADO** ainda: download do binário da mídia e recibo de leitura.
+
+## Validação adversarial por agentes independentes (2026-11-04, 11:56 -03)
+
+Três auditorias rodaram contra o repositório sem permissão de escrita; os
+achados foram corrigidos por TDD e revalidados.
+
+| Frente | Veredito inicial | Correção | Prova |
+| --- | --- | --- | --- |
+| Cliente MCP externo (SDK oficial 1.17.3 e 1.32.2) | passou com 8 divergências de transporte | notificação 202, versão 400, content-type 415, `Origin` 403, 405+`Allow`, `-32601` | `testes/mcp-transporte.test.ts` (8) + recibo do SDK |
+| Segurança e robustez | 2 críticos, 4 altos, 4 médios | `Host` não derruba, `tools/call` aguardado, webhook sem SSRF e com HMAC, sessão reposicionada, rate limit, `%` = 400, 500 sem detalhe | `testes/robustez.test.ts` (11) |
+| Docs e OSS | não era “produto open source completo” | governança, release, metadados, contagens reais, PARIDADE reproduzível, marca em SVG | `PARIDADE.md`, `CHANGELOG.md`, CI do commit |
+
+Reprodução ao vivo do que antes matava o processo (porta 2803, motor simulado):
+
+```
+curl -H 'Host: a b' /api/health            -> 200 (antes: processo morto)
+POST /mcp tools/call MessageSendText       -> -32602 conflito (antes: morte + isError:false)
+GET  /api/health depois                    -> 200 (processo vivo)
+```
+
+Estado no fechamento: **68 testes, 68 verdes**, `tsc --noEmit` limpo, CI verde em
+`21805c8` (run 41853289353) e no commit seguinte (run 41853353512). Tag `v0.1.0`
+e release publicados em https://github.com/Voltolini-SPACE/fio-raiz/releases/tag/v0.1.0.
+Gate da Fábrica reexecutado sobre a entrega: `aprovado: true`, zero categorias.
+
+**NÃO VERIFICADO** nesta rodada: reconexão após queda real de rede, download do
+binário de mídia, recibo de leitura, TLS/proxy (fora de escopo por design) e SSR F
+de mídia no caminho Baileys (código revisado, não explorado em execução).
