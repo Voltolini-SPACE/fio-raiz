@@ -84,6 +84,10 @@ export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFab
         return;
       }
       const mensagem = erro instanceof Error ? erro.message : 'falha interna';
+      if ((erro as { codigo?: string }).codigo === 'motor_indisponivel') {
+        responder(res, 503, { erro: 'motor_indisponivel', mensagem });
+        return;
+      }
       responder(res, 500, { erro: 'falha_interna', mensagem });
     }
   });

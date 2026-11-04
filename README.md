@@ -1,5 +1,7 @@
 # Fio Raiz
 
+[![ci](https://github.com/Voltolini-SPACE/fio-raiz/actions/workflows/ci.yml/badge.svg)](https://github.com/Voltolini-SPACE/fio-raiz/actions/workflows/ci.yml)
+
 Gateway de WhatsApp auto-hospedado com API HTTP, MCP e painel — escrito do zero,
 sem dependências de produção, em Node 24 + TypeScript e SQLite embutido.
 
@@ -74,3 +76,9 @@ QR com um aparelho — verificado até a emissão do QR, não além.
 | [EVIDENCIA.md](EVIDENCIA.md) | ensaio real de ponta a ponta |
 
 Licença MIT — [LICENSE](LICENSE) · [NOTICE](NOTICE).
+
+## Qualidade
+
+`npm test` (45 testes) e `npm run check` (`tsc --noEmit`) rodam no CI a cada
+push; o badge acima mostra o estado. Sem `baileys` instalado a suíte passa e o
+`/start` responde `503 motor_indisponivel` com o comando de instalação.
