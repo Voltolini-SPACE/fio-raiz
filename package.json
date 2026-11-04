@@ -1,12 +1,11 @@
 {
   "name": "fio-raiz",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
-  "description": "Gateway de WhatsApp auto-hospedado com API HTTP, MCP e painel — código próprio",
+  "description": "Gateway de WhatsApp auto-hospedado com API HTTP, MCP e painel — implementação própria, zero dependência de produção",
   "license": "MIT",
   "engines": {
-    "node": ">=22.18"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "start": "node src/servidor.ts",
@@ -16,5 +15,28 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "typescript": "^5.6.0"
-  }
+  },
+  "author": {
+    "name": "Voltolini Space",
+    "email": "space@voltolini.space",
+    "url": "https://voltolini.space"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Voltolini-SPACE/fio-raiz.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Voltolini-SPACE/fio-raiz/issues"
+  },
+  "homepage": "https://github.com/Voltolini-SPACE/fio-raiz#readme",
+  "keywords": [
+    "whatsapp",
+    "gateway",
+    "mcp",
+    "api",
+    "baileys",
+    "self-hosted",
+    "sqlite",
+    "node"
+  ]
 }

@@ -122,8 +122,8 @@ Mostra visão geral, sessões e webhooks. É leitura; escrita é pela API ou MCP
   `data/.api-key` e `GET /api/auth/api-keys`.
 - Sintoma `409 conflito`: sessão já conectada (`start` repetido) ou envio em
   sessão parada.
-- Sintoma `500 falha_interna`: a mensagem vem no JSON; os testes cobrem o
-  caminho felizes e os erros nomeados (`npm test`).
+- Sintoma `500 falha_interna`: o cliente recebe só o tipo (detalhe fica no log do
+  servidor); os testes cobrem o caminho feliz e os erros nomeados (`npm test`).
 
 ## 10. Atualizar
 

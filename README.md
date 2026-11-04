@@ -60,9 +60,10 @@ continuam **NÃO VERIFICADOS**.
 
 ## Pré-requisitos externos
 
-O que não vem do código e precisa existir antes de parear. O plano da edição
-(`planos/v3/voltolini-fio-raiz.json`, chave `dependencias_externas`) declara o
-mesmo mapa; o gate da Fábrica reprova plano ou entrega sem ele.
+O que não vem do código e precisa existir antes de parear. O plano da réplica
+(vive no repositório da Fábrica, `planos/v3/voltolini-fio-raiz.json`, chave
+`dependencias_externas`) declara o mesmo mapa; o gate da Fábrica reprova plano ou
+entrega sem ele.
 
 | Dependência | Tipo | Quando | Risco | Alternativa |
 |---|---|---|---|---|

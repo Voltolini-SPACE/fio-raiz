@@ -1,0 +1,19 @@
+name: Proposta
+description: Ideia ou mudança de comportamento
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problema
+    attributes: { label: Qual problema isso resolve }
+    validations: { required: true }
+  - type: textarea
+    id: proposta
+    attributes: { label: Proposta e alternativas }
+    validations: { required: true }
+  - type: textarea
+    id: externo
+    attributes:
+      label: Dependência externa
+      description: Conta, credencial, aparelho, telefone, domínio, API, rede ou pagamento necessário?
+      placeholder: Se não houver, escreva "nenhuma".
+    validations: { required: true }
