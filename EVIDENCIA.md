@@ -228,6 +228,13 @@ na mesma rede do Mac (o `tailscale ping` do iPad sai por `DERP(sao)`, ou seja, f
 há cabo USB. CoreDevice não atravessa a internet — precisa de USB ou do mesmo Wi-Fi.
 `screencapture` no Mac via SSH também falha (`could not create image from display`, TCC).
 
-Conclusão: o Device Hub autoriza o Mac a falar com o iPad, mas só quando o iPad está alcançável
-(USB/LAN). A validação do Safari no iPad fica **NÃO VERIFICADO** por aqui; o caminho curto é abrir
-`/painel` no iPad (QR gerado em `docs/ipad-painel-qr.png`, fora do git).
+Reteste às 14:18: o iPad passou a `connecting` e depois disponível — `devicectl` tirou screenshot
+(1640x2360, tela inicial do iPadOS) e lançou o Safari (`Launched application with
+com.apple.mobilesafari`). O `--payload-url` não navegou: as capturas seguintes continuaram na
+página aberta (maestri.app) e, com `--terminate-existing`, na tela inicial. Ou seja: **controle do
+iPad pelo Device Hub funciona** (screenshot + launch), mas injeção de URL no Safari não; o toque
+final é no iPad.
+
+Rede: o iPad responde a `tailscale ping` por `DERP(sao)` (fora da LAN), e o portão aceita
+`100.64.0.0/10` — incluso o IP do iPad no teste `testes/rede.test.ts`. O HTTP a partir do iPad
+fica **NÃO VERIFICADO** (só falta abrir a URL); QR pronto em `docs/ipad-painel-qr.png` (fora do git).
