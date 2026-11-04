@@ -59,3 +59,15 @@ Ferramentas listadas: `HealthGet`, `SessionFindAll`, `SessionGetStats`,
 - Entrega de webhook contra serviço externo: coberta por teste com receptor HTTP
   local em `testes/webhooks.test.ts`, não contra a internet.
 - Carga, concorrência e recuperação após queda do processo.
+
+## Varredura de hashes contra o alvo (2026-11-04)
+
+```
+$ python3 scripts/conferir-hashes.py
+arquivos nossos: 40
+hashes do alvo: 2291
+colisoes: 0
+```
+
+Nenhum arquivo do produto coincide com qualquer arquivo do alvo: prova técnica de não cópia,
+complementar ao registro de contato prévio em RASTREABILIDADE.md.
