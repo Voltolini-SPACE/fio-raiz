@@ -11,6 +11,8 @@ WorkingDirectory=/home/voltolini-space/AI/voltolini-fio-raiz
 Environment=PORT=2793
 Environment=FIO_RAIZ_MOTOR=baileys
 Environment=FIO_RAIZ_DATA=/home/voltolini-space/AI/voltolini-fio-raiz/data
+Environment=FIO_RAIZ_HOST=0.0.0.0
+Environment=FIO_RAIZ_ACESSO=tailnet
 ExecStart=/home/voltolini-space/.local/node-v24.20.0/bin/node src/servidor.ts
 Restart=always
 RestartSec=2

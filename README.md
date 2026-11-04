@@ -33,8 +33,14 @@ curl -s -H "x-api-key: $CHAVE" -X POST -H 'content-type: application/json' \
 
 ## Rodar sem interrupções
 
-Units systemd prontas em [`deploy/`](deploy/): `fio-raiz.service` (gateway, `Restart=always`) e
-`fio-raiz-tunel.service` (túnel do Mac). Instruções em [`deploy/README.md`](deploy/README.md).
+Unit systemd pronta em [`deploy/`](deploy/): `fio-raiz.service` (gateway, `Restart=always`, sessão
+retomada no boot). Instruções em [`deploy/README.md`](deploy/README.md).
+
+## Acesso remoto (Mac, iPad, Maestri)
+
+Pelo Tailscale: `http://100.105.131.93:2793` de qualquer rede, com portão
+`FIO_RAIZ_ACESSO=tailnet` (só loopback e `100.64.0.0/10`; LAN/internet → 403). O painel
+`/painel` pede a chave; o MCP é `POST /mcp` com `x-api-key`. SSH para o Mac: `ssh mac`.
 
 ## O que já funciona
 

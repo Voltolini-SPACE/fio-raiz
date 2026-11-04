@@ -194,3 +194,26 @@ $ npx tsc --noEmit   # rc 0
 ```
 
 Fábrica: `ciclo --revalidar` → `pronto: true`, rodada 4, 0 pendências, 1 aviso (frentes).
+
+## Acesso remoto por Tailscale (04/11/2026, 17:10 BRT)
+
+Contexto: o Mac estava fora do IP antigo `192.168.68.72` (hoje `192.168.68.82`) e o `ssh mac`
+falhava; a Spark e o Mac já estão no mesmo tailnet.
+
+| Verificação | Saída |
+|---|---|
+| `tailscale status` (Spark) | `spark-1ec1 100.105.131.93`, `macbook-pro 100.84.63.59 active` |
+| `tailscale ping ipad-10th-gen-wifi` | `pong ... via DERP(sao) in 121ms` |
+| `ssh mac hostname` (HostName = tailnet) | `MacBook-Pro-de-Voltolini-2.local` |
+| Do Mac: `curl http://100.105.131.93:2793/api/health` | `{"estado":"ok",...}` |
+| Do Mac: `/painel` | `200` |
+| Do Mac: `curl .../api/sessions` com chave | sessão `pareamento` `conectada` |
+| Do Mac: MCP `initialize` + `tools/list` | `serverInfo fio-raiz 0.1.0`, `tools=10` |
+| LAN (Spark em 192.168.68.51) | `403 fora_da_tailnet` (portão) |
+
+Mudanças: `FIO_RAIZ_HOST`/`FIO_RAIZ_ACESSO` (bind + portão), unit escutando em `0.0.0.0`,
+`ssh mac` aponta para o IP do tailnet (`mac-lan` mantém o IP da LAN), unit do túnel reverso
+removida — o Tailscale a substitui.
+
+**NÃO VERIFICADO**: navegador no iPad e acesso físico fora da rede (o Mac está na LAN hoje);
+`tailscale serve` HTTPS exige habilitar no console do tailnet.

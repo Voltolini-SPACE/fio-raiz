@@ -19,6 +19,17 @@ const LIMITE_CORPO = 1_000_000;
 
 export type MotorOuFabrica = Motor | ((observador: ObservadorMotor) => Motor);
 
+/** Só loopback e a faixa CGNAT do Tailscale (100.64.0.0/10) passam quando `FIO_RAIZ_ACESSO=tailnet`. */
+export function enderecoPermitido(bruto: string | undefined): boolean {
+  if (!bruto) return false;
+  const endereco = bruto.startsWith('::ffff:') ? bruto.slice(7) : bruto;
+  if (endereco === '::1' || endereco.startsWith('127.')) return true;
+  const partes = endereco.split('.');
+  if (partes.length !== 4) return false;
+  const [primeiro = 0, segundo = 0] = partes.map(Number);
+  return primeiro === 100 && segundo >= 64 && segundo <= 127;
+}
+
 export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFabrica } = {}) {
   const pasta = opcoes.pastaDados ?? PASTA_DADOS;
   const banco = abrirBanco(pasta);
@@ -76,7 +87,12 @@ export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFab
   }
 
   const falhasPorIp = new Map<string, { n: number; inicio: number }>();
+  const somenteTailnet = process.env.FIO_RAIZ_ACESSO === 'tailnet';
   const servidor = createServer(async (req, res) => {
+    if (somenteTailnet && !enderecoPermitido(req.socket.remoteAddress)) {
+      responder(res, 403, { erro: 'fora_da_tailnet', mensagem: 'acesso restrito ao tailnet' });
+      return;
+    }
     // Nunca confie no header Host: base fixa evita TypeError que derrubava o processo.
     let url: URL;
     try {
@@ -141,10 +157,10 @@ export function criarAplicacao(opcoes: { pastaDados?: string; motor?: MotorOuFab
   return { servidor, banco, motor, chave: semente.chave, pastaDados: pasta };
 }
 
-export function iniciar(porta = PORTA): ReturnType<typeof criarAplicacao> {
+export function iniciar(porta = PORTA, host = process.env.FIO_RAIZ_HOST ?? '127.0.0.1'): ReturnType<typeof criarAplicacao> {
   const app = criarAplicacao();
-  app.servidor.listen(porta, '127.0.0.1', () => {
-    console.log(`Fio Raiz em http://127.0.0.1:${porta} · chave em ${app.pastaDados}/.api-key`);
+  app.servidor.listen(porta, host, () => {
+    console.log(`Fio Raiz em http://${host}:${porta} · chave em ${app.pastaDados}/.api-key`);
   });
   return app;
 }
